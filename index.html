@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lumina Library | 3D Interactive Circular Book Showcase</title>
+  <!-- Google Fonts: Inter & Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            display: ['"Outfit"', 'sans-serif']
+          },
+          colors: {
+            brand: {
+              50: '#f0f7ff',
+              100: '#e0effe',
+              200: '#bae0fd',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+              800: '#1e40af',
+              900: '#1e3a8a',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 min-h-screen transition-colors duration-200 antialiased selection:bg-blue-500 selection:text-white">
+
+  <!-- Navbar -->
+  <header class="sticky top-0 z-40 backdrop-blur-md bg-white/80 dark:bg-slate-950/80 border-b border-slate-200/80 dark:border-slate-800/80 transition-colors">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
+      <!-- Logo -->
+      <a href="#" class="flex items-center gap-3 group">
+        <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-sky-400 flex items-center justify-center text-white shadow-lg shadow-blue-500/25 group-hover:scale-105 transition-transform">
+          <i data-lucide="book-open" class="w-6 h-6"></i>
+        </div>
+        <div>
+          <span class="font-display font-bold text-xl tracking-tight bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-800 dark:from-white dark:via-blue-200 dark:to-indigo-300 bg-clip-text text-transparent">LuminaBooks</span>
+          <span class="block text-xs text-slate-500 dark:text-slate-400 font-medium">Interactive 3D Digital Library</span>
+        </div>
+      </a>
+
+      <!-- Search Bar in Navbar (Visible on md+) -->
+      <div class="hidden md:flex flex-1 max-w-lg mx-6 relative">
+        <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+        <input 
+          type="text" 
+          id="navSearchInput" 
+          placeholder="Search by title, author, or genre..."
+          class="w-full pl-10 pr-4 py-2.5 bg-slate-100/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all placeholder:text-slate-400"
+        />
+        <button id="clearSearchBtn" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <!-- Add Book Button -->
+        <button id="openAddBookBtn" class="hidden sm:inline-flex items-center gap-2 px-3.5 py-2 text-sm font-semibold rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/60 transition">
+          <i data-lucide="plus-circle" class="w-4 h-4"></i>
+          <span>Add Book</span>
+        </button>
+
+        <!-- Wishlist Button -->
+        <button id="openWishlistBtn" class="relative p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-900 transition text-slate-600 dark:text-slate-300">
+          <i data-lucide="bookmark" class="w-5 h-5"></i>
+          <span id="wishlistCountBadge" class="absolute -top-1 -right-1 w-5 h-5 text-[11px] font-bold bg-rose-500 text-white rounded-full flex items-center justify-center scale-0 transition-transform">0</span>
+        </button>
+
+        <!-- My Bookshelf / Borrowed Drawer Button -->
+        <button id="openShelfBtn" class="relative inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium text-sm shadow-md shadow-blue-500/20 transition-all active:scale-95">
+          <i data-lucide="library" class="w-4 h-4"></i>
+          <span class="hidden sm:inline">My Shelf</span>
+          <span id="borrowedCountBadge" class="w-5 h-5 text-xs font-bold bg-white text-blue-700 rounded-full flex items-center justify-center">0</span>
+        </button>
+
+        <!-- Dark/Light Theme Toggle -->
+        <button id="themeToggleBtn" class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-900 transition text-slate-600 dark:text-slate-300" title="Toggle theme">
+          <i data-lucide="moon" class="w-5 h-5 hidden dark:block"></i>
+          <i data-lucide="sun" class="w-5 h-5 block dark:hidden"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Search Bar -->
+    <div class="px-4 pb-3 md:hidden">
+      <div class="relative">
+        <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+        <input 
+          type="text" 
+          id="mobileSearchInput" 
+          placeholder="Search by title, author, or genre..."
+          class="w-full pl-10 pr-4 py-2.5 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+        />
+      </div>
+    </div>
+  </header>
+
+  <!-- VIEW MODE SWITCHER BANNER -->
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-4 p-2 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl shadow-sm">
+      <div class="flex items-center gap-3 px-3 py-1">
+        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+        <span class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Display Mode</span>
+        <span class="text-xs text-slate-400 dark:text-slate-500">• Switch views anytime</span>
+      </div>
+
+      <div class="flex items-center gap-1.5 p-1 bg-slate-100 dark:bg-slate-800/80 rounded-xl w-full sm:w-auto">
+        <button id="viewMode3DBtn" class="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-5 py-2 text-xs font-bold rounded-lg transition-all bg-blue-600 text-white shadow-md shadow-blue-500/25">
+          <i data-lucide="orbit" class="w-4 h-4"></i>
+          <span>3D Circular Orbit</span>
+        </button>
+        <button id="viewModeGridBtn" class="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-5 py-2 text-xs font-bold rounded-lg transition-all text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">
+          <i data-lucide="layout-grid" class="w-4 h-4"></i>
+          <span>Standard Grid Catalog</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================================================
+       SECTION 1: 3D CIRCULAR ORBIT CAROUSEL VIEW
+       ========================================================================== -->
+  <section id="orbitSection" class="relative overflow-hidden pt-6 pb-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <!-- Interactive Guidance Pill -->
+      <div class="text-center mb-6">
+        <div class="inline-flex flex-wrap items-center justify-center gap-3 px-4 py-2 rounded-full bg-blue-50/80 dark:bg-blue-950/40 border border-blue-200/60 dark:border-blue-900/40 text-blue-700 dark:text-blue-300 text-xs font-medium">
+          <span class="flex items-center gap-1.5 font-bold">
+            <i data-lucide="mouse-pointer-2" class="w-3.5 h-3.5 text-blue-500"></i> Move mouse left / right:
+          </span>
+          <span>Books rotate in a circle one by one</span>
+          <span class="text-blue-400">|</span>
+          <span class="flex items-center gap-1.5 font-bold">
+            <i data-lucide="rotate-cw" class="w-3.5 h-3.5 text-indigo-500"></i> Touch / Click any book:
+          </span>
+          <span class="bg-indigo-100 dark:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 font-bold px-2 py-0.5 rounded-full">360° Spin!</span>
+        </div>
+      </div>
+
+      <!-- 3D Perspective Stage -->
+      <div id="orbitStage" class="orbit-perspective-stage w-full h-[460px] flex items-center justify-center relative cursor-ew-resize">
+        <!-- Floor Glow / Shadow -->
+        <div class="orbit-floor-shadow"></div>
+
+        <!-- 3D Rotating Ring Cylinder -->
+        <div id="orbitRing" class="orbit-ring">
+          <!-- Injected dynamically with 3D Books -->
+        </div>
+
+        <!-- Touch Drag Hint Overlay -->
+        <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 text-xs text-slate-400 dark:text-slate-500 select-none pointer-events-none">
+          <i data-lucide="move-horizontal" class="w-4 h-4 animate-pulse"></i>
+          <span>Drag or hover across screen to spin the 3D ring</span>
+        </div>
+      </div>
+
+      <!-- Orbit Controls Bar -->
+      <div class="max-w-xl mx-auto mt-4 flex items-center justify-between gap-4 p-3 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl shadow-sm">
+        <button id="orbitPrevBtn" class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition" title="Rotate Left">
+          <i data-lucide="chevron-left" class="w-5 h-5"></i>
+        </button>
+
+        <div class="flex items-center gap-3">
+          <button id="toggleAutoSpinBtn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition">
+            <i data-lucide="play" class="w-3.5 h-3.5" id="autoSpinIcon"></i>
+            <span id="autoSpinLabel">Auto Spin</span>
+          </button>
+          
+          <button id="spinCurrent360Btn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 transition">
+            <i data-lucide="rotate-3d" class="w-3.5 h-3.5"></i>
+            <span>Spin Book 360°</span>
+          </button>
+        </div>
+
+        <button id="orbitNextBtn" class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition" title="Rotate Right">
+          <i data-lucide="chevron-right" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Focused Book Spotlight Card -->
+      <div id="spotlightCard" class="max-w-2xl mx-auto mt-6 p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-xl shadow-slate-200/40 dark:shadow-black/40 transition-all">
+        <!-- Injected dynamically -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================================================
+       SECTION 2: STANDARD GRID CATALOG VIEW
+       ========================================================================== -->
+  <section id="gridSection" class="hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <!-- Filter & Sort Bar -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-slate-200 dark:border-slate-800">
+      <div class="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0 scrollbar-none" id="genreFilterContainer">
+        <button class="genre-pill active" data-genre="all">All Genres</button>
+        <button class="genre-pill" data-genre="Fiction">Fiction</button>
+        <button class="genre-pill" data-genre="Sci-Fi">Sci-Fi</button>
+        <button class="genre-pill" data-genre="Technology">Technology</button>
+        <button class="genre-pill" data-genre="Self-Help">Self-Help</button>
+        <button class="genre-pill" data-genre="History">History</button>
+        <button class="genre-pill" data-genre="Mystery">Mystery</button>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <label class="flex items-center gap-2 text-xs font-medium cursor-pointer select-none text-slate-600 dark:text-slate-400">
+          <input type="checkbox" id="availableOnlyToggle" class="w-4 h-4 rounded text-blue-600 focus:ring-blue-500 border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900">
+          <span>Available Only</span>
+        </label>
+
+        <div class="relative">
+          <select id="sortSelect" class="text-xs font-medium px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
+            <option value="popular">Most Popular</option>
+            <option value="rating">Highest Rated</option>
+            <option value="title">Title (A-Z)</option>
+            <option value="year">Newest First</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-4 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+      <div id="resultsCount">Showing all books</div>
+      <button id="resetFiltersBtn" class="hidden text-blue-600 dark:text-blue-400 hover:underline">
+        Reset filters
+      </button>
+    </div>
+
+    <!-- Books Grid -->
+    <div id="booksGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-6">
+      <!-- Book Cards injected via JS -->
+    </div>
+
+    <!-- Empty State -->
+    <div id="emptyState" class="hidden text-center py-20">
+      <div class="w-16 h-16 rounded-2xl bg-slate-100 dark:bg-slate-900 text-slate-400 flex items-center justify-center mx-auto mb-4">
+        <i data-lucide="book-x" class="w-8 h-8"></i>
+      </div>
+      <h3 class="font-display font-bold text-lg text-slate-800 dark:text-slate-200">No books found</h3>
+      <p class="text-sm text-slate-500 dark:text-slate-400 mt-1 max-w-sm mx-auto">
+        We couldn't find any books matching your search.
+      </p>
+      <button onclick="resetAllFilters()" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-xl text-xs font-semibold hover:bg-blue-700 transition">
+        Clear Filters
+      </button>
+    </div>
+  </section>
+
+  <!-- ==========================================================================
+       MODAL: FULL 3D INTERACTIVE BOOK INSPECTOR (FREE 360° ORBIT + COVER FLIP)
+       ========================================================================== -->
+  <div id="inspectorModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md opacity-0 pointer-events-none transition-all duration-300">
+    <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-3xl w-full border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden transform scale-95 transition-transform duration-300 flex flex-col">
+      <!-- Inspector Header -->
+      <div class="p-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="p-2 rounded-xl bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400">
+            <i data-lucide="rotate-3d" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="font-display font-bold text-lg text-slate-900 dark:text-white" id="inspectorBookTitle">3D Book Inspector</h3>
+            <p class="text-xs text-slate-500">Drag mouse anywhere to freely rotate in full 3D space</p>
+          </div>
+        </div>
+        <button id="closeInspectorBtn" class="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Inspector 3D Canvas / Stage -->
+      <div class="p-6 bg-gradient-to-b from-slate-100 to-slate-200 dark:from-slate-950 dark:to-slate-900 flex flex-col items-center justify-center relative overflow-hidden">
+        <div class="inspector-stage" id="inspectorStage">
+          <div id="inspectorBookBox" class="inspector-book-box">
+            <!-- 3D Faces injected dynamically -->
+          </div>
+        </div>
+
+        <!-- 3D Controls Toolbar -->
+        <div class="flex items-center gap-2 mt-4 z-10 flex-wrap justify-center">
+          <button id="inspectorSpin360Btn" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold shadow-md transition flex items-center gap-1.5">
+            <i data-lucide="rotate-cw" class="w-3.5 h-3.5"></i>
+            <span>Spin 360°</span>
+          </button>
+          <button id="inspectorFlipCoverBtn" class="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-xl text-xs font-semibold shadow-sm transition flex items-center gap-1.5">
+            <i data-lucide="book-open" class="w-3.5 h-3.5"></i>
+            <span id="flipCoverLabel">Open Cover</span>
+          </button>
+          <button id="inspectorResetAngleBtn" class="px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-xl text-xs font-semibold transition">
+            Reset Angle
+          </button>
+        </div>
+      </div>
+
+      <!-- Inspector Footer Details -->
+      <div class="p-6 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div>
+          <p class="text-xs text-slate-400">Interactive 3D Hardcover rendering with spine typography, paper block edges & embossed back cover.</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <button id="inspectorBorrowBtn" class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-md transition">
+            Borrow Book
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Standard Book Detail & Excerpt Modal -->
+  <div id="bookModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm opacity-0 pointer-events-none transition-all duration-300">
+    <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-2xl w-full border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden transform scale-95 transition-transform duration-300">
+      <div class="relative p-6 sm:p-8" id="modalContent">
+        <!-- Injected dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide-out Drawer: My Bookshelf (Borrowed Books) -->
+  <div id="shelfDrawer" class="fixed inset-0 z-50 overflow-hidden pointer-events-none">
+    <div id="shelfBackdrop" class="absolute inset-0 bg-slate-950/50 backdrop-blur-sm opacity-0 transition-opacity duration-300"></div>
+    <div class="fixed inset-y-0 right-0 max-w-full flex pl-10 pointer-events-auto">
+      <div id="shelfPanel" class="w-screen max-w-md bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-2xl transform translate-x-full transition-transform duration-300 flex flex-col">
+        <div class="p-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="p-2 rounded-xl bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400">
+              <i data-lucide="book-marked" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h2 class="font-display font-bold text-lg text-slate-900 dark:text-white">My Active Shelf</h2>
+              <p class="text-xs text-slate-500 dark:text-slate-400">Currently borrowed books & return dates</p>
+            </div>
+          </div>
+          <button id="closeShelfBtn" class="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+
+        <div class="flex-1 overflow-y-auto p-6 space-y-4" id="shelfList"></div>
+
+        <div class="p-6 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50">
+          <div class="flex items-center justify-between text-xs text-slate-500 mb-3">
+            <span>Borrowing Limit</span>
+            <span class="font-semibold text-slate-900 dark:text-white" id="shelfLimitStatus">0 / 5 Books</span>
+          </div>
+          <p class="text-[11px] text-slate-400 dark:text-slate-500">
+            Standard loan period is 14 days. You can renew or return any title at any time.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide-out Drawer: Wishlist -->
+  <div id="wishlistDrawer" class="fixed inset-0 z-50 overflow-hidden pointer-events-none">
+    <div id="wishlistBackdrop" class="absolute inset-0 bg-slate-950/50 backdrop-blur-sm opacity-0 transition-opacity duration-300"></div>
+    <div class="fixed inset-y-0 right-0 max-w-full flex pl-10 pointer-events-auto">
+      <div id="wishlistPanel" class="w-screen max-w-md bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-2xl transform translate-x-full transition-transform duration-300 flex flex-col">
+        <div class="p-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="p-2 rounded-xl bg-rose-100 dark:bg-rose-900/50 text-rose-600 dark:text-rose-400">
+              <i data-lucide="heart" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h2 class="font-display font-bold text-lg text-slate-900 dark:text-white">Saved for Later</h2>
+              <p class="text-xs text-slate-500 dark:text-slate-400">Your curated reading wishlist</p>
+            </div>
+          </div>
+          <button id="closeWishlistBtn" class="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+
+        <div class="flex-1 overflow-y-auto p-6 space-y-4" id="wishlistContainer"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add New Book Modal -->
+  <div id="addBookModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm opacity-0 pointer-events-none transition-all duration-300">
+    <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-lg w-full border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden transform scale-95 transition-transform duration-300 p-6 sm:p-8">
+      <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+            <i data-lucide="book-plus" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="font-display font-bold text-lg text-slate-900 dark:text-white">Add New Library Book</h3>
+            <p class="text-xs text-slate-500">Insert custom catalog entry</p>
+          </div>
+        </div>
+        <button id="closeAddBookBtn" class="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="addBookForm" class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Book Title *</label>
+          <input type="text" id="newBookTitle" required placeholder="e.g. Neuromancer" class="w-full px-3.5 py-2 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Author *</label>
+            <input type="text" id="newBookAuthor" required placeholder="e.g. William Gibson" class="w-full px-3.5 py-2 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Genre *</label>
+            <select id="newBookGenre" class="w-full px-3.5 py-2 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none">
+              <option value="Sci-Fi">Sci-Fi</option>
+              <option value="Fiction">Fiction</option>
+              <option value="Technology">Technology</option>
+              <option value="Self-Help">Self-Help</option>
+              <option value="History">History</option>
+              <option value="Mystery">Mystery</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Year</label>
+            <input type="number" id="newBookYear" value="2023" class="w-full px-3.5 py-2 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Pages</label>
+            <input type="number" id="newBookPages" value="320" class="w-full px-3.5 py-2 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Rating</label>
+            <input type="number" step="0.1" min="1" max="5" id="newBookRating" value="4.8" class="w-full px-3.5 py-2 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Cover Image URL (Optional)</label>
+          <input type="url" id="newBookCover" placeholder="https://images.unsplash.com/..." class="w-full px-3.5 py-2 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Synopsis / Description *</label>
+          <textarea id="newBookDesc" rows="3" required placeholder="Brief description of the book..." class="w-full px-3.5 py-2 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"></textarea>
+        </div>
+
+        <div class="flex items-center justify-end gap-3 pt-3">
+          <button type="button" id="cancelAddBookBtn" class="px-4 py-2 text-sm font-medium rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+            Cancel
+          </button>
+          <button type="submit" class="px-5 py-2 text-sm font-semibold rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-500/20 transition">
+            Save Book
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- Footer -->
+  <footer class="mt-20 border-t border-slate-200 dark:border-slate-800 py-10 bg-white/50 dark:bg-slate-950/50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-2">
+        <div class="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center text-white">
+          <i data-lucide="book-open" class="w-4 h-4"></i>
+        </div>
+        <span class="font-display font-bold text-sm">Lumina 3D Library System</span>
+      </div>
+      <p class="text-xs text-slate-500">
+        Created with 3D Circular Orbit Physics, 360° Book Spin, and Interactive Book Inspection.
+      </p>
+    </div>
+  </footer>
+
+  <!-- App Script -->
+  <script src="app.js"></script>
+</body>
+</html>
